@@ -7,11 +7,15 @@ import static com.company.Main.Tools.*;
 
 public class Main {
     public static void main(String[] args) throws EnterNumException {
+        // Ввод информации от пользователя
         enterInformation();
+        // Разбор на составляющие
         parsingExpression(example);
+        // Обнаружение системы вычисления (Арабский вариант)
         if (Correction.IsThatArab(firstStr) && Correction.IsThatArab(secondStr)) {
             System.out.println(calculation(Integer.parseInt(firstStr), operation, Integer.parseInt(secondStr)));
         }
+        // Обнаружение системы вычисления (Римский вариант)
         if (Correction.isThatRome(firstStr) && Correction.isThatRome(secondStr)) {
             initArray();
             int one = translateRomeToArab(firstStr, romeNumerals);
@@ -25,10 +29,12 @@ public class Main {
             }
         }
         else{
+            // Обработка исключений
             throw new EnterNumException();
         }
     }
 
+    // Класс, который проводит операции вычисления
     public static class Tools {
 
         // строка от пользователя
@@ -43,12 +49,14 @@ public class Main {
         // массив римских значений
         static Map<String, String> romeNumerals = new HashMap<String, String>();
 
+        // ввод
         static void enterInformation() {
             System.out.println("Enter your ex");
             Scanner in = new Scanner(System.in);
             example = in.nextLine();
         }
 
+        // перевод
         static void parsingExpression(String example) throws EnterNumException {
             String str1 = "";
             String str2 = "";
@@ -92,6 +100,7 @@ public class Main {
             }
         }
 
+        // вычисления
         static int calculation(int first, String operation, int second) {
             int answer = 0;
             switch (operation) {
@@ -111,6 +120,7 @@ public class Main {
             return answer;
         }
 
+        // перевод римских чисел в арабские
         static int translateRomeToArab(String number, Map<String, String> romeNumerals) {
             char[] symbols = number.toCharArray();
             int resultRomeToArab;
@@ -147,6 +157,7 @@ public class Main {
 
         }
 
+        // перевод арабских чисел в римские
         static String translateArabToRomeAll(int val) {
             int firstInt = 1;
             String result = "";
@@ -233,6 +244,7 @@ public class Main {
         }
     }
 
+    // Класс, который уточняет систему вычислений
     public static class Correction {
 
         static boolean IsThatArab(String value) {
