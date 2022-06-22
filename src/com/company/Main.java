@@ -1,49 +1,55 @@
 package com.company;
+
 import java.io.IOException;
 import java.util.*;
 
 import static com.company.Main.Tools.*;
 
 public class Main {
-    // строка от пользователя
-    static String example;
-
-    // 2 переменные из строки example
-    static String firstStr;
-    static String secondStr;
-    // оператор от пользователя
-    static String operation;
-    // int переменные пользователя
-    static int firstInt;
-    static int secondInt;
-    static int resultArab;
-    static String resultRome;
-    // массив римских значений
-    static Map<String, String> romeNumerals = new HashMap<String, String>();
-
-    // окончательный результат из римских чисел
-    static String answer;
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws EnterNumException {
         enterInformation();
         parsingExpression(example);
-        if (validParseInt(firstStr) && validParseInt(secondStr)){
-            calculation(parseInt(firstStr), operation, parseInt(secondStr));
+        if (Correction.IsThatArab(firstStr) && Correction.IsThatArab(secondStr)) {
+            System.out.println(calculation(Integer.parseInt(firstStr), operation, Integer.parseInt(secondStr)));
         }
-        if (!validParseInt(firstStr) && !validParseInt(secondStr)){
+        if (Correction.isThatRome(firstStr) && Correction.isThatRome(secondStr)) {
             initArray();
-            firstInt = translateRomeToArab(firstStr, romeNumerals);
-            secondInt = translateRomeToArab(secondStr, romeNumerals);
-            calculation(firstInt, operation, secondInt);
-            answer = translateArabToRomeAll(resultArab);
-            System.out.println(answer);
+            int one = translateRomeToArab(firstStr, romeNumerals);
+            int two = translateRomeToArab(secondStr, romeNumerals);
+            int res = (calculation(one, operation, two));
+            if (res <= 0){
+                throw new EnterNumException();
+            }
+            else {
+                System.out.println(translateArabToRomeAll(res));
+            }
         }
         else{
-            System.out.println("Введено не корректное значение");
+            throw new EnterNumException();
         }
     }
-    public static class Tools{
-        static void parsingExpression(String example) {
+
+    public static class Tools {
+
+        // строка от пользователя
+        static String example;
+
+        // оператор примера
+        static String operation = "";
+        // 2 переменные из строки example
+        static String firstStr;
+        static String secondStr;
+
+        // массив римских значений
+        static Map<String, String> romeNumerals = new HashMap<String, String>();
+
+        static void enterInformation() {
+            System.out.println("Enter your ex");
+            Scanner in = new Scanner(System.in);
+            example = in.nextLine();
+        }
+
+        static void parsingExpression(String example) throws EnterNumException {
             String str1 = "";
             String str2 = "";
             // local var
@@ -57,6 +63,7 @@ public class Main {
                     triggerToChangeTwo = true;
                     continue;
                 }
+
                 if (word[i] == ' ' && number.isEmpty()) {
                     triggerToChangeTwo = false;
                     continue;
@@ -80,8 +87,12 @@ public class Main {
             }
             firstStr = str1;
             secondStr = str2;
+            if (firstStr.isEmpty() || secondStr.isEmpty() || operation.equals("")) {
+                throw new EnterNumException();
+            }
         }
-        static void calculation(int first, String operation, int second) {
+
+        static int calculation(int first, String operation, int second) {
             int answer = 0;
             switch (operation) {
                 case ("*"):
@@ -97,37 +108,11 @@ public class Main {
                     answer = first - second;
                     break;
             }
-            resultArab = answer;
+            return answer;
         }
-        static void initArray() {
-            romeNumerals.put("I", "1");
-            romeNumerals.put("V", "5");
-            romeNumerals.put("X", "10");
-            romeNumerals.put("L", "50");
-            romeNumerals.put("C", "100");
-            romeNumerals.put("D", "500");
-            romeNumerals.put("M", "1000");
-        }
-        static void enterInformation (){
-            System.out.println("Введите значения");
-            Scanner in = new Scanner(System.in);
-            example = in.nextLine();
-        }
-        static boolean validParseInt (String value){
-            try {
-                Integer.parseInt(value);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        static int parseInt (String value){
-            int res = 0;
-            res = Integer.parseInt(value);
-            return res;
-        }
+
         static int translateRomeToArab(String number, Map<String, String> romeNumerals) {
-            char [] symbols = number.toCharArray();
+            char[] symbols = number.toCharArray();
             int resultRomeToArab;
             int[] arabNum = new int[symbols.length];
             for (int i = 0; i < symbols.length; i++) {
@@ -161,79 +146,126 @@ public class Main {
             }
 
         }
+
         static String translateArabToRomeAll(int val) {
             int firstInt = 1;
             String result = "";
-            String valString = ""+val;
-            char [] arr = valString.toCharArray();
+            String valString = "" + val;
+            char[] arr = valString.toCharArray();
             for (int i = 0; i < arr.length; i++) {
-                int depth  = String.valueOf(Math.abs(val)).length() - 1 - i;
-                String firstString = String.valueOf(arr[i] );
-                firstInt = Integer.parseInt(firstString) * (int)Math.pow(10, depth);
+                int depth = String.valueOf(Math.abs(val)).length() - 1 - i;
+                String firstString = String.valueOf(arr[i]);
+                firstInt = Integer.parseInt(firstString) * (int) Math.pow(10, depth);
                 result += translateArabToRomeOne(firstInt);
             }
             return result;
         }
-        static String translateArabToRomeOne(int val){
+
+        static String translateArabToRomeOne(int val) {
             // инициализация массивов
-            String [] one = {"I", "V", "X"};
-            String [] two = {"X", "L", "C"};
-            String [] three = {"C", "D", "M"};
-            String [] four = {"M", "MD"};
+            String[] one = {"I", "V", "X"};
+            String[] two = {"X", "L", "C"};
+            String[] three = {"C", "D", "M"};
+            String[] four = {"M", "MD"};
             // получаем количество нулей
-            int depth  = String.valueOf(Math.abs(val)).length() - 1;
+            int depth = String.valueOf(Math.abs(val)).length() - 1;
 
             // получаем первое значение
-            String valString = ""+val;
-            char [] arr = valString.toCharArray();
+            String valString = "" + val;
+            char[] arr = valString.toCharArray();
             String firstString = String.valueOf(arr[0]);
             int firstInt = Integer.parseInt(firstString);
-            String [] actualArray = new String[3];
+            String[] actualArray = new String[3];
             //Смотрим разрядность
-            if (depth == 0){
+            if (depth == 0) {
                 actualArray = one;
             }
-            if (depth == 1){
+            if (depth == 1) {
                 actualArray = two;
             }
-            if (depth == 2){
+            if (depth == 2) {
                 actualArray = three;
             }
-            if (depth == 3){
+            if (depth == 3) {
                 actualArray = four;
             }
-            if (firstInt == 1){
+            if (firstInt == 1) {
                 return actualArray[0];
             }
-            if (firstInt == 2){
+            if (firstInt == 2) {
                 return actualArray[0] + actualArray[0];
             }
-            if (firstInt == 3){
+            if (firstInt == 3) {
                 return actualArray[0] + actualArray[0] + actualArray[0];
             }
-            if (firstInt == 4){
+            if (firstInt == 4) {
                 return actualArray[0] + actualArray[1];
             }
-            if (firstInt == 5){
+            if (firstInt == 5) {
                 return actualArray[1];
             }
-            if (firstInt == 6){
+            if (firstInt == 6) {
                 return actualArray[1] + actualArray[0];
             }
-            if (firstInt == 7){
+            if (firstInt == 7) {
                 return actualArray[1] + actualArray[0] + actualArray[0];
             }
-            if (firstInt == 8){
+            if (firstInt == 8) {
                 return actualArray[1] + actualArray[0] + actualArray[0] + actualArray[0];
             }
-            if (firstInt == 9 ){
+            if (firstInt == 9) {
                 return actualArray[0] + actualArray[2];
             }
-            if (firstInt == 10){
+            if (firstInt == 10) {
                 return actualArray[0];
             }
             return "";
         }
+
+        static void initArray() {
+            romeNumerals.put("I", "1");
+            romeNumerals.put("V", "5");
+            romeNumerals.put("X", "10");
+            romeNumerals.put("L", "50");
+            romeNumerals.put("C", "100");
+            romeNumerals.put("D", "500");
+            romeNumerals.put("M", "1000");
+        }
+    }
+
+    public static class Correction {
+
+        static boolean IsThatArab(String value) {
+            try {
+                Integer.parseInt(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        static boolean isThatRome(String value) {
+            int count = 0;
+            String[] romeSimphols = {"I", "V", "X", "L", "C", "D", "M", "MD"};
+            String[] arr = value.split("");
+            for (String s : arr) {
+                for (int i = 0; i < romeSimphols.length; i++) {
+                    if (s.equals(romeSimphols[i])) {
+                        count++;
+                    }
+                    else{
+                        continue;
+                    }
+                }
+
+            }
+            if (arr.length != count){
+                return false;
+            }
+            return true;
+        }
     }
 }
+
+
 
