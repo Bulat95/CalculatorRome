@@ -16,12 +16,12 @@ public class Main {
             System.out.println(calculation(Integer.parseInt(firstStr), operation, Integer.parseInt(secondStr)));
         }
         // Обнаружение системы вычисления (Римский вариант)
-        if (Correction.isThatRome(firstStr) && Correction.isThatRome(secondStr)) {
+        else if (Correction.isThatRome(firstStr) && Correction.isThatRome(secondStr)) {
             initArray();
             int one = translateRomeToArab(firstStr, romeNumerals);
             int two = translateRomeToArab(secondStr, romeNumerals);
             int res = (calculation(one, operation, two));
-            if (res <= 0){
+            if (res <= 0 || one < 1 || one >10 || two < 1 || two > 10){
                 throw new EnterNumException();
             }
             else {
@@ -249,7 +249,10 @@ public class Main {
 
         static boolean IsThatArab(String value) {
             try {
-                Integer.parseInt(value);
+                int x = Integer.parseInt(value);
+                if (x > 10 || x < 1){
+                    return false;
+                }
                 return true;
             } catch (NumberFormatException e) {
                 return false;
